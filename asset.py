@@ -1,18 +1,33 @@
+import pygame
+
+
 class Block:
-    def __init__(self, height, width, color=None):
+    def __init__(self, height, width, x, y, color=None):
         self.height = height
         self.width = width
         self.color = color
         self.edge = False
+        self.selected = False
+        self.x = x
+        self.y = y
 
     def set_color(self, color):
         self.color = color
 
-    def set_edge(self):
-        self.edge = True
+    # Checks to see if this block has been selected by the user
+    def is_selected(self):
+        return self.selected
 
-    def clear_edge(self):
-        self.edge = False
+    # Signifies that the user selected the block using the mouse
+    def select(self, selected):
+        self.selected = selected
 
-    def is_edge(self):
-        return self.edge
+    def get_position(self):
+        return self.x, self.y
+
+    def get_dimension(self):
+        return self.width, self.height
+
+    # Draws the current block on to the screen
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, [self.x * self.width, self.y * self.height, self.width, self.height])

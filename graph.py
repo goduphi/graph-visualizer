@@ -10,18 +10,22 @@ class Graph:
             colored independently. The idea is to get a single block,
             color it accordingly, and then draw it to the screen
         '''
-        self.grid = [[Block(cell_dimension, cell_dimension, Color().white) for column in range(size)] for row in range(size)]
+        self.grid = self.create_graph(size, cell_dimension)
         self.directed = directed
+
+    def create_graph(self, size, cell_dimension):
+        grid = []
+        for row in range(size):
+            grid.append([])
+            for column in range(size):
+                grid[row].append(Block(cell_dimension, cell_dimension, row, column, Color().white))
+        return grid
 
     def get_graph(self):
         return self.grid
 
     def add_edge(self, row, column):
-        if row < 0 or row > self.size or column < 0 or column > self.size:
-            return False
-        self.grid[row][column].set_edge()
-        if not self.directed:
-            self.grid[column][row].set_edge()
+        pass
 
     def get_block(self, coordinate):
         return self.grid[coordinate[0]][coordinate[1]]
