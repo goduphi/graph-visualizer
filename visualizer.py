@@ -26,13 +26,16 @@ def draw_grid(screen, g):
     pygame.display.flip()
 
 
-def bfs(g, s, draw):
+def bfs(g, start, end, draw):
     graph = g.get_graph()
     size = len(graph)
-    visited = [s]
-    node_queue = [s]
+    color = Color().green
+    visited = [start]
+    node_queue = [start]
     while len(node_queue) > 0:
         x, y = node_queue.pop(0)
+        if (x, y) == end:
+            return True
         '''
             We want to visit all the neighbors of the current node.
             Since it is a 2D matrix, we want to look to the right of the node,
@@ -45,28 +48,30 @@ def bfs(g, s, draw):
         # Look to the right
         if y < size - 1 and not (graph[x][y + 1].get_position() in visited):
             node_queue.append(graph[x][y + 1].get_position())
-            graph[x][y + 1].set_color(Color().red)
+            graph[x][y + 1].set_color(color)
             visited.append(graph[x][y + 1].get_position())
 
         # Look below
         if x < size - 1 and not (graph[x + 1][y].get_position() in visited):
             node_queue.append(graph[x + 1][y].get_position())
-            graph[x + 1][y].set_color(Color().red)
+            graph[x + 1][y].set_color(color)
             visited.append(graph[x + 1][y].get_position())
 
         # Look to the left
         if x > 0 and not (graph[x - 1][y].get_position() in visited):
             node_queue.append(graph[x - 1][y].get_position())
-            graph[x - 1][y].set_color(Color().red)
+            graph[x - 1][y].set_color(color)
             visited.append(graph[x - 1][y].get_position())
 
         # Look above
         if y > 0 and not (graph[x][y - 1].get_position() in visited):
             node_queue.append(graph[x][y - 1].get_position())
-            graph[x][y - 1].set_color(Color().red)
+            graph[x][y - 1].set_color(color)
             visited.append(graph[x][y - 1].get_position())
 
         draw()
+
+    return False
 
 
 def main():
@@ -77,7 +82,7 @@ def main():
     grid_size = window_size[0] // block_dimension
 
     # Create a directed graph
-    g = Graph(grid_size, True)
+    g = Graph(grid_size, cell_dimension=block_dimension)
     start = None
     end = None
 
@@ -99,11 +104,17 @@ def main():
                 column = mouse_position[0] // block_dimension
                 row = mouse_position[1] // block_dimension
                 block = g.get_block((column, row))
-                if l:
-                    start = block.get_position()
+                if l and not block.is_selected():
+                    block.select(True)
+                    start = (column, row)
+                    block.set_color(Color().red)
+                elif r and not block.is_selected():
+                    block.select(True)
+                    end = (column, row)
                     block.set_color(Color().blue)
+                draw_grid(screen, g)
             elif event.type == pygame.KEYDOWN:
-                bfs(g, start, lambda: draw_grid(screen, g))
+                bfs(g, start, end, lambda: draw_grid(screen, g))
 
         if start is None:
             draw_grid(screen, g)
