@@ -30,4 +30,4 @@ class Block:
 
     # Draws the current block on to the screen
     def draw(self, screen):
-        pygame.draw.rect(screen, self.color, [self.x * self.width, self.y * self.height, self.width, self.height])
+        pygame.draw.rect(screen, self.color, [self.y * self.width, self.x * self.height, self.width, self.height])

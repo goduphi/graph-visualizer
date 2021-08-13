@@ -6,6 +6,7 @@ import pygame
 from color import Color
 from graph import Graph
 from utils import *
+import math
 
 
 def draw_grid(screen, g):
@@ -26,15 +27,53 @@ def draw_grid(screen, g):
     pygame.display.flip()
 
 
+def draw_shortest_distace(g, start, end, distance, draw):
+    '''
+        Look in all directions. Move towards the direction
+        which will bring us closer to the start node.
+    '''
+    end_copy = end
+    graph = g.get_graph()
+    while end != start:
+        x, y = end
+        # Look up
+        if distance[x - 1][y] < distance[x][y]:
+            end = x - 1, y
+        if distance[x + 1][y] < distance[x][y]:
+            end = x + 1, y
+        if distance[x][y + 1] < distance[x][y]:
+            end = x, y + 1
+        if distance[x][y - 1] < distance[x][y]:
+            end = x, y - 1
+
+        graph[end[0]][end[1]].set_color(Color().green)
+
+        draw()
+
+    x, y = start
+    graph[x][y].set_color(Color().orange)
+    x, y = end_copy
+    graph[x][y].set_color(Color().blue)
+    draw()
+
+
 def bfs(g, start, end, draw):
     graph = g.get_graph()
     size = len(graph)
-    color = Color().green
+    color = Color().purple
     visited = [start]
+    distance = [[math.inf for column in range(size)] for row in range(size)]
+
+    # Set the distance of the source node to 0
+    distance[start[0]][start[1]] = 0
     node_queue = [start]
+
     while len(node_queue) > 0:
         x, y = node_queue.pop(0)
         if (x, y) == end:
+            print('\n'.join([''.join(['{:4}'.format(item) for item in row])
+                             for row in distance]))
+            draw_shortest_distace(g, start, end, distance, draw)
             return True
         '''
             We want to visit all the neighbors of the current node.
@@ -48,24 +87,28 @@ def bfs(g, start, end, draw):
         # Look to the right
         if y < size - 1 and not (graph[x][y + 1].get_position() in visited):
             node_queue.append(graph[x][y + 1].get_position())
+            distance[x][y + 1] = distance[x][y] + 1
             graph[x][y + 1].set_color(color)
             visited.append(graph[x][y + 1].get_position())
 
         # Look below
         if x < size - 1 and not (graph[x + 1][y].get_position() in visited):
             node_queue.append(graph[x + 1][y].get_position())
+            distance[x + 1][y] = distance[x][y] + 1
             graph[x + 1][y].set_color(color)
             visited.append(graph[x + 1][y].get_position())
 
         # Look to the left
         if x > 0 and not (graph[x - 1][y].get_position() in visited):
             node_queue.append(graph[x - 1][y].get_position())
+            distance[x - 1][y] = distance[x][y] + 1
             graph[x - 1][y].set_color(color)
             visited.append(graph[x - 1][y].get_position())
 
         # Look above
         if y > 0 and not (graph[x][y - 1].get_position() in visited):
             node_queue.append(graph[x][y - 1].get_position())
+            distance[x][y - 1] = distance[x][y] + 1
             graph[x][y - 1].set_color(color)
             visited.append(graph[x][y - 1].get_position())
 
@@ -87,6 +130,7 @@ def main():
     end = None
 
     pygame.init()
+    pygame.display.set_caption("Graph Visualizer")
     screen = pygame.display.set_mode(window_size)
 
     done = False
@@ -103,14 +147,15 @@ def main():
                 # The // is integer division in python which I had no idea about
                 column = mouse_position[0] // block_dimension
                 row = mouse_position[1] // block_dimension
-                block = g.get_block((column, row))
+                print(row, column)
+                block = g.get_block((row, column))
                 if l and not block.is_selected():
                     block.select(True)
-                    start = (column, row)
-                    block.set_color(Color().red)
+                    start = (row, column)
+                    block.set_color(Color().orange)
                 elif r and not block.is_selected():
                     block.select(True)
-                    end = (column, row)
+                    end = (row, column)
                     block.set_color(Color().blue)
                 draw_grid(screen, g)
             elif event.type == pygame.KEYDOWN:
