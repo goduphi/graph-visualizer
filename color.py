@@ -6,4 +6,4 @@ class Color:
         self.red = (255, 0, 0)
         self.blue = (0, 0, 255)
         self.purple = (102, 0, 102)
-        self.orange = (204, 102, 0)
+        self.orange = (255, 128, 0)

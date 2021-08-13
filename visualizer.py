@@ -71,8 +71,6 @@ def bfs(g, start, end, draw):
     while len(node_queue) > 0:
         x, y = node_queue.pop(0)
         if (x, y) == end:
-            print('\n'.join([''.join(['{:4}'.format(item) for item in row])
-                             for row in distance]))
             draw_shortest_distace(g, start, end, distance, draw)
             return True
         '''
@@ -142,27 +140,51 @@ def main():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_position = pygame.mouse.get_pos()
                 (l, m, r) = pygame.mouse.get_pressed()
+
                 # Get the block which signifies the position in the matrix
                 # where the user wants to put a break point
                 # The // is integer division in python which I had no idea about
                 column = mouse_position[0] // block_dimension
                 row = mouse_position[1] // block_dimension
-                print(row, column)
+
                 block = g.get_block((row, column))
-                if l and not block.is_selected():
-                    block.select(True)
+
+                # There can can only be one start position
+                # Left mouse button input
+                if l and not start:
+                    # If the block position is the end position, don't select
+                    if end == block.get_position():
+                        break
                     start = (row, column)
                     block.set_color(Color().orange)
-                elif r and not block.is_selected():
-                    block.select(True)
+                # Only let the user select one start position
+                elif l and start and start == block.get_position():
+                    start = None
+                    block.set_color(Color().white)
+
+                # Right mouse button input
+                if r and not end:
+                    # If the block position is the start position, don't select
+                    if start == block.get_position():
+                        break
                     end = (row, column)
                     block.set_color(Color().blue)
-                draw_grid(screen, g)
-            elif event.type == pygame.KEYDOWN:
-                bfs(g, start, end, lambda: draw_grid(screen, g))
+                # Only let the user select one end position
+                elif r and end and end == block.get_position():
+                    end = None
+                    block.set_color(Color().white)
 
-        if start is None:
-            draw_grid(screen, g)
+            elif event.type == pygame.KEYDOWN:
+                # Only run the algorithm if both the start and end conditions are defined
+                # Use the Space key
+                if event.key == pygame.K_SPACE and start and end:
+                    bfs(g, start, end, lambda: draw_grid(screen, g))
+                # Reset the visualizer using the R key
+                if event.key == pygame.K_r:
+                    g.reset()
+                    start = end = None
+
+        draw_grid(screen, g)
 
     pygame.quit()
 

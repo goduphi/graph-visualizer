@@ -5,6 +5,7 @@ from color import Color
 class Graph:
     def __init__(self, size, directed=False, cell_dimension=20):
         self.size = size
+        self.cell_dimension = cell_dimension
         '''
             The matrix is filled with an array of Blocks which can be
             colored independently. The idea is to get a single block,
@@ -20,6 +21,9 @@ class Graph:
             for column in range(size):
                 grid[row].append(Block(cell_dimension, cell_dimension, row, column, Color().white))
         return grid
+
+    def reset(self):
+        self.grid = self.create_graph(self.size, self.cell_dimension)
 
     def get_graph(self):
         return self.grid
