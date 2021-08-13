@@ -10,6 +10,7 @@ class Block:
         self.selected = False
         self.x = x
         self.y = y
+        self.barrier = False
 
     def set_color(self, color):
         self.color = color
@@ -31,3 +32,9 @@ class Block:
     # Draws the current block on to the screen
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, [self.y * self.width, self.x * self.height, self.width, self.height])
+
+    def set_barrier(self, barrier):
+        self.barrier = barrier
+
+    def is_barrier(self):
+        return self.barrier

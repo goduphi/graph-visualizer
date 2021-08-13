@@ -1,4 +1,5 @@
 '''
+Author: Sarker Nadir Afridi Azmi
 Grid code: http://programarcadegames.com/index.php?lang=en&chapter=array_backed_grids
 '''
 
@@ -27,7 +28,7 @@ def draw_grid(screen, g):
     pygame.display.flip()
 
 
-def draw_shortest_distace(g, start, end, distance, draw):
+def draw_shortest_distance(g, start, end, distance, draw):
     '''
         Look in all directions. Move towards the direction
         which will bring us closer to the start node.
@@ -71,7 +72,7 @@ def bfs(g, start, end, draw):
     while len(node_queue) > 0:
         x, y = node_queue.pop(0)
         if (x, y) == end:
-            draw_shortest_distace(g, start, end, distance, draw)
+            draw_shortest_distance(g, start, end, distance, draw)
             return True
         '''
             We want to visit all the neighbors of the current node.
@@ -83,28 +84,28 @@ def bfs(g, start, end, draw):
             Watch out for index out of bounds errors
         '''
         # Look to the right
-        if y < size - 1 and not (graph[x][y + 1].get_position() in visited):
+        if y < size - 1 and not (graph[x][y + 1].get_position() in visited) and not graph[x][y + 1].is_barrier():
             node_queue.append(graph[x][y + 1].get_position())
             distance[x][y + 1] = distance[x][y] + 1
             graph[x][y + 1].set_color(color)
             visited.append(graph[x][y + 1].get_position())
 
         # Look below
-        if x < size - 1 and not (graph[x + 1][y].get_position() in visited):
+        if x < size - 1 and not (graph[x + 1][y].get_position() in visited) and not graph[x + 1][y].is_barrier():
             node_queue.append(graph[x + 1][y].get_position())
             distance[x + 1][y] = distance[x][y] + 1
             graph[x + 1][y].set_color(color)
             visited.append(graph[x + 1][y].get_position())
 
         # Look to the left
-        if x > 0 and not (graph[x - 1][y].get_position() in visited):
+        if x > 0 and not (graph[x - 1][y].get_position() in visited) and not graph[x - 1][y].is_barrier():
             node_queue.append(graph[x - 1][y].get_position())
             distance[x - 1][y] = distance[x][y] + 1
             graph[x - 1][y].set_color(color)
             visited.append(graph[x - 1][y].get_position())
 
         # Look above
-        if y > 0 and not (graph[x][y - 1].get_position() in visited):
+        if y > 0 and not (graph[x][y - 1].get_position() in visited) and not graph[x][y - 1].is_barrier():
             node_queue.append(graph[x][y - 1].get_position())
             distance[x][y - 1] = distance[x][y] + 1
             graph[x][y - 1].set_color(color)
@@ -135,46 +136,49 @@ def main():
     while not done:
         # Listen for user input here
         for event in pygame.event.get():
+            mouse_position = pygame.mouse.get_pos()
+            (l, m, r) = pygame.mouse.get_pressed()
+
+            # Get the block which signifies the position in the matrix
+            # where the user wants to put a break point
+            # The // is integer division in python which I had no idea about
+            column = mouse_position[0] // block_dimension
+            row = mouse_position[1] // block_dimension
+
             if event.type == pygame.QUIT:
                 done = True
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_position = pygame.mouse.get_pos()
-                (l, m, r) = pygame.mouse.get_pressed()
 
-                # Get the block which signifies the position in the matrix
-                # where the user wants to put a break point
-                # The // is integer division in python which I had no idea about
-                column = mouse_position[0] // block_dimension
-                row = mouse_position[1] // block_dimension
-
+            if event.type == pygame.MOUSEBUTTONDOWN:
                 block = g.get_block((row, column))
 
                 # There can can only be one start position
                 # Left mouse button input
-                if l and not start:
-                    # If the block position is the end position, don't select
-                    if end == block.get_position():
-                        break
-                    start = (row, column)
-                    block.set_color(Color().orange)
-                # Only let the user select one start position
-                elif l and start and start == block.get_position():
-                    start = None
-                    block.set_color(Color().white)
+                if not r:
+                    if l and not start:
+                        # If the block position is the end position, don't select
+                        if end == block.get_position():
+                            break
+                        start = (row, column)
+                        block.set_color(Color().orange)
+                    # Only let the user select one start position
+                    elif l and start and start == block.get_position():
+                        start = None
+                        block.set_color(Color().white)
 
                 # Right mouse button input
-                if r and not end:
-                    # If the block position is the start position, don't select
-                    if start == block.get_position():
-                        break
-                    end = (row, column)
-                    block.set_color(Color().blue)
-                # Only let the user select one end position
-                elif r and end and end == block.get_position():
-                    end = None
-                    block.set_color(Color().white)
+                if not l:
+                    if r and not end:
+                        # If the block position is the start position, don't select
+                        if start == block.get_position():
+                            break
+                        end = (row, column)
+                        block.set_color(Color().blue)
+                    # Only let the user select one end position
+                    elif r and end and end == block.get_position():
+                        end = None
+                        block.set_color(Color().white)
 
-            elif event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN:
                 # Only run the algorithm if both the start and end conditions are defined
                 # Use the Space key
                 if event.key == pygame.K_SPACE and start and end:
@@ -183,6 +187,13 @@ def main():
                 if event.key == pygame.K_r:
                     g.reset()
                     start = end = None
+
+                # Hover over block and press F to fill that block with a barrier
+                if event.key == pygame.K_f:
+                    block = g.get_block((row, column))
+                    if block.get_position() != start and block.get_position() != end:
+                        block.set_barrier(True)
+                        block.set_color(Color().black)
 
         draw_grid(screen, g)
 

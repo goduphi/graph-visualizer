@@ -28,8 +28,5 @@ class Graph:
     def get_graph(self):
         return self.grid
 
-    def add_edge(self, row, column):
-        pass
-
     def get_block(self, coordinate):
         return self.grid[coordinate[0]][coordinate[1]]
