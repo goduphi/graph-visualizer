@@ -6,7 +6,7 @@ I decided to create a visualizer that cemented my understanding of visualization
 The Visualizer only includes Breadth-First Search, but it can be extended to include other graph searching algorithms
 
 ### Demo
-![](demo/graph-visualization.gif)
+<img src="demo/graph-visualization.gif" width="500" height="500"/>
 
 # Dependencies
 - pygame [pip install pygame]
